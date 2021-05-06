@@ -11,8 +11,8 @@ time_table_drop = "DROP TABLE IF EXISTS time;"
 songplay_table_create = ("""
 CREATE TABLE songplays (
     id SERIAL PRIMARY KEY,
-    start_time TIMESTAMP,
-    user_id INT,
+    start_time TIMESTAMP NOT NULL,
+    user_id INT NOT NULL,
     level TEXT,
     song_id TEXT,
     artist_id TEXT,
@@ -25,18 +25,18 @@ CREATE TABLE songplays (
 user_table_create = ("""
 CREATE TABLE users (
     id INT PRIMARY KEY,
-    first_name TEXT,
-    last_name TEXT,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
     gender TEXT,
-    level TEXT
+    level TEXT NOT NULL
 );
 """)
 
 song_table_create = ("""
 CREATE TABLE songs (
     id TEXT PRIMARY KEY,
-    title TEXT,
-    artist_id TEXT,
+    title TEXT NOT NULL,
+    artist_id TEXT NOT NULL,
     year INT,
     duration DECIMAL
 );
@@ -45,7 +45,7 @@ CREATE TABLE songs (
 artist_table_create = ("""
 CREATE TABLE artists (
     id TEXT PRIMARY KEY,
-    name TEXT,
+    name TEXT NOT NULL,
     location TEXT,
     latitude DECIMAL,
     longitude DECIMAL
@@ -55,12 +55,12 @@ CREATE TABLE artists (
 time_table_create = ("""
 CREATE TABLE time(
     start_time TIMESTAMP PRIMARY KEY,
-    hour INT,
-    day INT,
-    week INT,
-    month INT,
-    year INT,
-    weekday INT
+    hour INT NOT NULL,
+    day INT NOT NULL,
+    week INT NOT NULL,
+    month INT NOT NULL,
+    year INT NOT NULL,
+    weekday INT NOT NULL
 );
 """)
 
@@ -74,7 +74,7 @@ VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
 user_table_insert = ("""
 INSERT INTO users (id, first_name, last_name, gender, level)
 VALUES (%s, %s, %s, %s, %s)
-ON CONFLICT DO NOTHING
+ON CONFLICT (user_id) DO UPDATE SET level=EXCLUDED.level
 """)
 
 song_table_insert = ("""
@@ -98,7 +98,7 @@ ON CONFLICT DO NOTHING
 # FIND SONGS
 
 song_select = ("""
-SELECT songs.id, artist_id, duration
+SELECT songs.id, artist_id
 FROM songs 
 JOIN artists ON songs.artist_id = artists.id
 WHERE songs.title=%s AND artists.name=%s AND duration=%s
