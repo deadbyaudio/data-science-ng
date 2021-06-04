@@ -27,6 +27,13 @@ Together with the fact table the schema will contain four dimension tables. Thre
 
 ### Sort keys and distribution keys
 
+##### STAGING TABLES:
+
+- staging_events: `ts` is the timestamp of the event and a good <u>sort key</u>. A good <u>distribution key</u> would be `artist`. The reason is that to build the `songplays` table we need to join `staging_events` with `staging_songs` using the `artist` and the `song` fields for it. As artist will be the first criteria for the JOIN, it will be better to have all the entries about the same artist stored together.
+- staging_songs: `artist_name` and `song_title` will be the fields used to join this table to `staging_events` in order to build the fact table `songplays`. As `artist_name` is the first criteria for this JOIN, it will make sense to have all the songs by the same artist stored together and use `artist_name` as <u>distribution key</u>
+
+##### ANALYTICS TABLES:
+
 - **songplays:** `start_time` is a good <u>sort key</u> as it determines when the songplay event was created and `user_id` was chosen as <u>distribution key</u>, in order to keep all the songplays by the same user together in the same place.
 - **users:** Since users have no associated timestamp but an already existing user id, this `id` could act as the <u>sort key</u> for this table. Since this is a small table and will be joined quite often to `songplays` it makes sense that this table uses the ALL distribution style.
 - **songs:** songs does not have an associated timestamp either, so their pre-existing `id` could be also a good sorting criteria and a good <u>sort key</u>. Since several songs can belong to the same artist and it is very possible that this table will be joined with artists, it makes sense to use `artist_id` as <u>distribution key</u>
@@ -94,20 +101,20 @@ SELECT level, count(1) FROM songplays GROUP BY level ORDER BY level DESC
 
 Find the 5 users with more songplays with their first name, last_name and number of songplays
 
-SELECT user.first_name, user.last_name, count(1) FROM songplays JOIN users ON songplays.user_id = users.id GROUP BY songplays.user_id LIMIT 5
+```
+SELECT users.first_name, users.last_name, count(1) FROM songplays JOIN users ON songplays.user_id = users.id GROUP BY users.first_name, users.last_name ORDER BY count DESC LIMIT 5
+```
 
 Find the name of the 5 most listened artists
 
-SELECT artist.name, count(1) FROM songplays JOIN artists ON songplays.artist_id = artists.id GROUP BY songplays.artist_id LIMIT 5
+```
+SELECT artists.name AS artist_name, count(1) FROM songplays JOIN artists ON songplays.artist_id = artists.id GROUP BY artist_name ORDER BY count DESC LIMIT 5
+```
 
 Find the title of the 10 most listened songs
 
-SELECT song.title, count(1) FROM songplays JOIN songs ON songplays.song_id = artists.id GROUP BY songplays.song_id LIMIT 10
-
-Find the favourite artist for user id 15
-
 ```
-SELECT artist_id, artists.name, count(1) FROM songplays JOIN artists ON songplays.artist_id=artists.id WHERE songplays.user_id = 15 GROUP BY artist_id, artists.name ORDER BY count LIMIT 1
+SELECT artists.name AS artist_name, songs.title, count(1) FROM songplays JOIN artists ON songplays.artist_id = artists.id JOIN songs ON songplays.song_id = songs.id GROUP BY artists.name, songs.title ORDER BY count DESC LIMIT 10
 ```
 
 Find the 5 hour time frames with more song plays:
