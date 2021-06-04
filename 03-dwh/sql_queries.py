@@ -19,7 +19,7 @@ time_table_drop = "DROP TABLE IF EXISTS time"
 
 staging_events_table_create= ("""
     CREATE TABLE staging_events(
-        artist TEXT,
+        artist TEXT distkey,
         auth TEXT,
         first_name TEXT,
         gender TEXT,
@@ -34,7 +34,7 @@ staging_events_table_create= ("""
         session_id INT,
         song TEXT,
         status INT,
-        ts BIGINT,
+        ts BIGINT sortkey,
         user_agent TEXT,
         user_id INT
     );
@@ -47,7 +47,7 @@ staging_songs_table_create = ("""
         artist_latitude DECIMAL(10,6),
         artist_longitude DECIMAL(10,6),
         artist_location VARCHAR(512),
-        artist_name TEXT,
+        artist_name TEXT distkey,
         song_id TEXT,
         title TEXT,
         duration DECIMAL(7,2),
@@ -71,12 +71,12 @@ songplay_table_create = ("""
 
 user_table_create = ("""
     CREATE TABLE users (
-        id INT sortkey distkey,
+        id INT sortkey,
         first_name TEXT NOT NULL,
         last_name TEXT NOT NULL,
         gender TEXT,
         level TEXT NOT NULL
-    );
+    ) DISTSTYLE ALL;
 """)
 
 song_table_create = ("""
@@ -91,7 +91,7 @@ song_table_create = ("""
 
 artist_table_create = ("""
     CREATE TABLE artists (
-        id TEXT sortkey distkey,
+        id TEXT sortkey,
         name TEXT NOT NULL,
         location TEXT,
         latitude DECIMAL(10,6),
