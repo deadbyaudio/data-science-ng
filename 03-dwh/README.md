@@ -23,7 +23,7 @@ To refresh that, the schema will consist on a fact table, `songplays` that will 
 
 Together with the fact table the schema will contain four dimension tables. Three of them will offer more information about the user, the song and the artist respectively and the fourth one, `time`, will extend the different timestamps in the events allowing to classify the different events within different time frames.
 
-![dbmodel](/home/albvt/work/data-science-ng/01-data-modelling-psql/dbmodel.png)
+![dbmodel](dbmodel.png)
 
 ### Sort keys and distribution keys
 
