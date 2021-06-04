@@ -139,18 +139,45 @@ staging_songs_copy = ("""
 # FINAL TABLES
 
 songplay_table_insert = ("""
-    INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent) (
-        SELECT se.ts AS start_time, se.user_id, se.level, ss.song_id, ss.artist_id, se.session_id, se.location, se.user_agent 
+    INSERT INTO songplays (
+        start_time, 
+        user_id, 
+        level, 
+        song_id, 
+        artist_id, 
+        session_id, 
+        location, 
+        user_agent
+    ) (
+        SELECT  se.ts AS start_time, 
+                se.user_id, 
+                se.level, 
+                ss.song_id, 
+                ss.artist_id, 
+                se.session_id, 
+                se.location, 
+                se.user_agent 
         FROM staging_events se
         LEFT JOIN staging_songs ss ON (ss.artist_name = se.artist AND ss.title = se.song) 
         WHERE page = 'NextSong'
     )
 """)
 
+# Ordering the row number partition by ts in order to get the last available info (especially level) from the user
 user_table_insert = ("""
     INSERT INTO users (
-        SELECT id, first_name, last_name, gender, level FROM (
-            SELECT DISTINCT user_id AS id, first_name, last_name, gender, level, row_number() over (partition by id order by ts desc) as row
+        SELECT  id, 
+                first_name, 
+                last_name, 
+                gender, 
+                level 
+        FROM (
+            SELECT DISTINCT user_id AS id, 
+                            first_name, 
+                            last_name, 
+                            gender, 
+                            level, 
+                            row_number() over (partition by id order by ts desc) as row
             FROM staging_events
             WHERE page = 'NextSong'
         )
@@ -160,27 +187,45 @@ user_table_insert = ("""
 
 song_table_insert = ("""
     INSERT INTO songs (
-        SELECT song_id AS id, title, artist_id, duration, year
+        SELECT  song_id AS id, 
+                title, 
+                artist_id, 
+                duration, 
+                year
         FROM staging_songs
     )
 """)
 
+# Ordering the row number partition by location to leave NULL location entries last
 artist_table_insert = ("""
     INSERT INTO artists (
-        SELECT DISTINCT artist_id AS id, artist_name AS name, artist_location AS location, artist_latitude as latitude, artist_longitude AS longitude
-        FROM staging_songs
+        SELECT  id,
+                name,
+                location,
+                latitude,
+                longitude
+        FROM (
+            SELECT DISTINCT artist_id AS id, 
+                            artist_name AS name, 
+                            NULLIF(artist_location, '') AS location, 
+                            artist_latitude as latitude, 
+                            artist_longitude AS longitude,
+                            row_number() over (partition by id ORDER BY location) AS row
+            FROM staging_songs
+        )
+        WHERE row = 1
     )
 """)
 
 time_table_insert = ("""
     INSERT INTO time(
         SELECT  start_time,
-            extract(hour FROM timestamp) AS hour,
-            extract(day FROM timestamp) AS day,
-            extract(week FROM timestamp) AS week,
-            extract(month FROM timestamp) AS month,
-            extract(year FROM timestamp) AS year,
-            extract(weekday FROM timestamp) AS weekday 
+                extract(hour FROM timestamp) AS hour,
+                extract(day FROM timestamp) AS day,
+                extract(week FROM timestamp) AS week,
+                extract(month FROM timestamp) AS month,
+                extract(year FROM timestamp) AS year,
+                extract(weekday FROM timestamp) AS weekday 
         FROM (
             SELECT DISTINCT ts AS start_time, timestamp 'epoch' + ts/1000 * interval '1 second' AS timestamp 
             FROM staging_events

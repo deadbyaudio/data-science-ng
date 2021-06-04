@@ -4,18 +4,39 @@ from sql_queries import create_table_queries, drop_table_queries
 
 
 def drop_tables(cur, conn):
+    """
+    Description: Drops all the existing Redshift tables
+    
+    Arguments:
+        cur: the cursor object. 
+        conn: the connection object. 
+    Returns:
+        None
+    """
     for query in drop_table_queries:
         cur.execute(query)
         conn.commit()
 
 
 def create_tables(cur, conn):
+    """
+    Description: Creates all the staging and analytics tables in Redshift
+    
+    Arguments:
+        cur: the cursor object. 
+        conn: the connection object. 
+    Returns:
+        None
+    """
     for query in create_table_queries:
         cur.execute(query)
         conn.commit()
 
 
 def main():
+    """
+    Description: The program entry point when this file gets executed
+    """
     config = configparser.ConfigParser()
     config.read('dwh.cfg')
 
