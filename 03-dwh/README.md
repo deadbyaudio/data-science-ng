@@ -27,24 +27,14 @@ Together with the fact table the schema will contain four dimension tables. Thre
 
 ### Sort keys and distribution keys
 
-##### STAGING TABLES:
+At this point, we do not really know which queries will be ran more frequently or if newer data will be more frequently queried than older data, so we can let Redshift sort the data automatically and not specify any sort keys.
 
-- staging_events: `ts` is the timestamp of the event and a good <u>sort key</u>. A good <u>distribution key</u> would be `artist`. The reason is that to build the `songplays` table we need to join `staging_events` with `staging_songs` using the `artist` and the `song` fields for it. As artist will be the first criteria for the JOIN, it will be better to have all the entries about the same artist stored together.
-- staging_songs: `artist_name` and `song_title` will be the fields used to join this table to `staging_events` in order to build the fact table `songplays`. As `artist_name` is the first criteria for this JOIN, it will make sense to have all the songs by the same artist stored together and use `artist_name` as <u>distribution key</u>
-
-##### ANALYTICS TABLES:
-
-- **songplays:** `start_time` is a good <u>sort key</u> as it determines when the songplay event was created and `user_id` was chosen as <u>distribution key</u>, in order to keep all the songplays by the same user together in the same place.
-- **users:** Since users have no associated timestamp but an already existing user id, this `id` could act as the <u>sort key</u> for this table. Since this is a small table and will be joined quite often to `songplays` it makes sense that this table uses the ALL distribution style.
-- **songs:** songs does not have an associated timestamp either, so their pre-existing `id` could be also a good sorting criteria and a good <u>sort key</u>. Since several songs can belong to the same artist and it is very possible that this table will be joined with artists, it makes sense to use `artist_id` as <u>distribution key</u>
-- **artists:** Same as with songs and users, artists have no associated timestamp, so `id` could be a good sort criteria and <u>sort key</u>.
-- **time:** `start_time` contains all the information needed about the timestamp and should be used as <u>sort key</u>.
+For distribution keys, as the primary keys we are using for each of the dimension tables are unique (even though Redshift does not force this uniqueness), and also will be the columns used in joins, so all of them can make very good distribution keys.
 
 ### Other decisions
 
 Some additional changes were needed from the schema in the Data Modelling assignment, which were:
 
-- Primary keys constraints do not get applied in Redshift, therefore they are not needed
 - `id` in `songplays` cannot be of `SERIAL` type in Redshift. Its equivalent type is `IDENTITY(0,1)`
 - `DECIMAL` fields specified just like that did not respect the decimal part of the original data. `DECIMAL (10, 6)` was used for longitudes and latitudes and `DECIMAL (7,2)` for song duration.
 - In this assignment some location fields with more than 256 characters allocated for the type `TEXT` were found in the event files causing the ETL to break. For this reason, `VARCHAR(512)` was chosen as the type for the `location` field in `songplays`.
