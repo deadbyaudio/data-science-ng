@@ -205,11 +205,13 @@ def main():
     Description: Main function that starts the program
     """
     spark = create_spark_session()
-    input_data = "s3a://udacity-dend/"
-    output_data = "s3a://udacity-datalake-albvt/"
+    input_data = config['PATHS']['INPUT_DATA']
+    output_data = config['PATHS']['OUTPUT_DATA']
 
     process_song_data(spark, input_data, output_data)
     process_log_data(spark, input_data, output_data)
+
+    spark.stop()
 
 
 if __name__ == "__main__":
