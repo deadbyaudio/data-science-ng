@@ -123,7 +123,7 @@ If an error reporting that **configparser** module is not present appears when e
 sudo pip install configparser
 ```
 
-# Example queries
+# Running queries
 
 To run the following example queries in SQL with Spark, three previous steps are required:
 
@@ -158,7 +158,7 @@ songplay_df.createOrReplaceTempView("songplays")
 
 And once we have done this, we can run any query on our recently created views using SQL using `spark.sql`
 
-Some example queries are
+# Example queries
 
 Users and their membership levels sorted by amount of songplays
 
@@ -171,7 +171,7 @@ spark.sql(
 	FROM songplays 
 	GROUP BY user_id, level ORDER BY count DESC
 """
-).toPandas()
+).show()
 ```
 
 Amount of song plays done under the different membership levels
@@ -184,7 +184,7 @@ spark.sql(
 	GROUP BY level 
 	ORDER BY level DESC
 """
-).toPandas()
+).show()
 ```
 
 Find the 5 users with more songplays with their first name, last_name and number of songplays
@@ -200,7 +200,8 @@ spark.sql(
 	GROUP BY users.first_name, users.last_name 
 	ORDER BY count DESC 
 	LIMIT 5
-""").toPandas()
+"""
+).show()
 ```
 
 Find the name of the 5 most listened artists
@@ -216,7 +217,7 @@ spark.sql(
 	ORDER BY count DESC 
 	LIMIT 5
 """
-).toPandas()
+).show()
 ```
 
 Find the title of the 10 most listened songs
@@ -233,7 +234,7 @@ spark.sql(
 			ORDER BY count DESC 
 			LIMIT 10
 """
-).toPandas()	
+).show()	
 ```
 
 Find the 5 hour time frames with more song plays:
@@ -247,6 +248,6 @@ spark.sql(
 	GROUP BY time.hour 
 	ORDER BY count DESC 
 	LIMIT 5
-""").toPandas()
+"""
+).show()
 ```
-
