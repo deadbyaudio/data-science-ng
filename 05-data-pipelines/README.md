@@ -31,7 +31,7 @@ The project contains the following files. and directories:
 
 This assignment has been developed using Airflow v2.1.2. If you don't use the provided docker compose, make sure you use the same or a similar version.
 
-### Execution steps
+#### Execution steps
 
 To execute the data pipeline the following steps are needed:
 
