@@ -38,7 +38,7 @@ To execute the data pipeline the following steps are needed:
 2. Go to the project directory
 
    ```
-   cd data-science-ng/05-data-pipeline
+   cd data-science-ng/05-data-pipelines
    ```
 
 3. Run the docker compose file and wait for all the containers to be running
